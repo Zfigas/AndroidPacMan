@@ -3,10 +3,9 @@ package org.example.pacman;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,6 +48,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         gameView =  findViewById(R.id.gameView);
         scoreView =  findViewById(R.id.score_num);
@@ -60,19 +60,29 @@ public class MainActivity extends Activity {
         levelUpTimeView.setText(Integer.toString(levelUpTime) + " sec");
         pause_start = findViewById(R.id.pause_start);
         LevelUpView.setText("Level: " + Integer.toString(currentLevel));
+
+
         //Listeners
         gameView.setOnTouchListener(new OnSwipeTouchListener(this) {
             public void onSwipeTop() {
-                direction = "top";
+                if (running) {
+                    direction = "top";
+                }
             }
             public void onSwipeRight() {
-                direction = "right";
+                if (running) {
+                    direction = "right";
+                }
             }
             public void onSwipeLeft() {
-                direction = "left";
+                if(running) {
+                    direction = "left";
+                }
             }
             public void onSwipeBottom() {
-                direction = "bottom";
+                if(running) {
+                    direction = "bottom";
+                }
             }
 
         });
@@ -133,7 +143,6 @@ public class MainActivity extends Activity {
 
 
 //      Save and update highscore
-
         SharedPreferences sharedpreferences = getSharedPreferences(pref, Context.MODE_PRIVATE);
         gameView.highScore = sharedpreferences.getInt(hscore, 0);
         gameView.username = sharedpreferences.getString(username, " ");
@@ -158,20 +167,18 @@ public class MainActivity extends Activity {
                     new CountDownTimer(3000, 1000) {
                         int tick = 3;
                         Toast toast;
-
                         public void onTick(long millisUntilFinished) {
                             if (tick == 3) {
                                 toast = Toast.makeText(getApplicationContext(), "Level " + Integer.toString(currentLevel) + ". Starting in " + Integer.toString(tick) + " sec", Toast.LENGTH_SHORT);
                             } else {
                                 toast.cancel();
                                 toast = Toast.makeText(getApplicationContext(), "Level " + Integer.toString(currentLevel) + ". Starting in " + Integer.toString(tick) + " sec", Toast.LENGTH_SHORT);
-                                LevelUpView.setText("Level: " +Integer.toString(currentLevel));
+                                LevelUpView.setText("Level: "+ Integer.toString(currentLevel));
                             }
                             tick--;
                             toast.setGravity(Gravity.CENTER, 0, 0);
                             toast.show();
                         }
-
                         public void onFinish() {
                             running = true;
                         }
@@ -190,16 +197,16 @@ public class MainActivity extends Activity {
             }
             if (running && gameView.finished ) {
                 running = false;
+                gameView.pacman = new Pacman(0, 0);
+                gameView.pacman.moveRight(0);
                 final Button pause_start = findViewById(R.id.pause_start);
                 pause_start.setText("Start");
                 Toast toast = Toast.makeText(getApplicationContext(), "Game over, press start when ready", Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
-                gameView.pacman = new Pacman(0, 0);
-                gameView.pacman.moveRight(0);
                 gameView.enemies = new ArrayList<>();
                 currentLevel = 1;
-                levelUpTimeView.setText("Level: "+ Integer.toString(currentLevel));
+                LevelUpView.setText("Level: "+ Integer.toString(currentLevel));
                 timePassed = 0;
                 direction = "right";
             }
@@ -277,14 +284,11 @@ public class MainActivity extends Activity {
              direction = "right";
              gameView.moveRight(0);
              timePassed = 0;
-             gameView.invalidate();
-             levelUpTimeView.setText("Level: "+ Integer.toString(1));
+             LevelUpView.setText("Level: "+ Integer.toString(currentLevel));
              running = false;
              Toast toast = Toast.makeText(this,"Press start when ready", Toast.LENGTH_LONG);
              toast.setGravity(Gravity.CENTER, 0, 0);
              toast.show();
-
-
             return true;
 
         }

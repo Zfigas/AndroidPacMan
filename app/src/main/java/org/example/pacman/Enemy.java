@@ -5,8 +5,8 @@ public class Enemy {
         public int enemyX;
         public int enemyY;
         public String orientation;
-        public int movePossiblity = 0;
-        public int moveDirection = 0;
+        public int movePossiblity;
+        public int moveDirection;
 
         public Enemy(int x, int y) {
             this.orientation = "right";
